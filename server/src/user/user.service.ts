@@ -38,6 +38,7 @@ export class UserService {
 			select: ['id', 'username', 'password', 'email'],
 		});
 	}
+
 	async findAll() {
 		try {
 			const user = await this.userRepository.find();
@@ -49,7 +50,10 @@ export class UserService {
 
 	async findOne(id: string) {
 		try {
-			const user = await this.userRepository.findOne({ where: { id } });
+			const user = await this.userRepository.findOne({
+				where: { id },
+				relations: ['recipes', 'favourite_recipes'],
+			});
 			if (!user) {
 				throw new NotFoundException(`user with the ${id} not found`);
 			}

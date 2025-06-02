@@ -22,26 +22,26 @@ export class UserController {
 		}
 	}
 
-	@UseGuards(JwtAuthGuard)
 	@Get()
+	@UseGuards(JwtAuthGuard)
 	findAll() {
 		return this.userService.findAll();
 	}
 
-	@UseGuards(JwtAuthGuard)
 	@Get(':id')
+	@UseGuards(JwtAuthGuard)
 	findOne(@Param('id') id: string) {
 		return this.userService.findOne(id);
 	}
 
-	@UseGuards(JwtAuthGuard)
 	@Patch(':id')
+	@UseGuards(JwtAuthGuard)
 	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.update(id, updateUserDto);
 	}
 
-	@UseGuards(JwtAuthGuard)
 	@Delete(':id')
+	@UseGuards(JwtAuthGuard)
 	remove(@Param('id') id: string) {
 		return this.userService.remove(id);
 	}
