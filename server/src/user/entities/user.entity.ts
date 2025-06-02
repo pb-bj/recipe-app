@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Recipe } from 'src/recipe/entities/recipe.entity';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -21,6 +22,13 @@ export class User {
 
 	@Column({ nullable: true })
 	avatarUrl?: string;
+
+	@OneToMany(() => Recipe, (recipe) => recipe.createdBy)
+	recipes: Recipe[];
+
+	@ManyToMany(() => Recipe, (recipe) => recipe.favouriteBy)
+	@JoinTable()
+	favourite_recipes: Recipe[];
 
 	@CreateDateColumn()
 	createdAt: Date;

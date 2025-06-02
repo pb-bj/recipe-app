@@ -1,0 +1,11 @@
+export enum RecipeCategory {
+	BREAKFAST = 'BREAKFAST',
+	HEALTHY = 'HEALTHY',
+	NON_VEG = 'NON-VEG',
+	VEG = 'VEG',
+	LUNCH = 'LUNCH',
+	DINNER = 'DINNER',
+	SNACK = 'SNACK',
+	DESSERT = 'DESSERT',
+	DRINK = 'DRINK',
+}
