@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
+import { SearchRecipeDto } from './dto/search-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Recipe } from './entities/recipe.entity';
 
@@ -109,5 +110,27 @@ export class RecipeService {
 		if (!user) throw new NotFoundException('User not found');
 
 		return user.favourite_recipes;
+	}
+
+	async searchRecipesMatching(searchRecipes: SearchRecipeDto) {
+		const { ingredients, category } = searchRecipes;
+		const candidate = await this.recipeRepository.find({
+			where: category ? { category } : {},
+		});
+
+		const userSet = ingredients.map((x) => x.toLowerCase().trim());
+
+		// subset-checking every candidate
+		const matchingRecipes = candidate.filter((recipe) => recipe.ingredients.map((x) => x.toLowerCase().trim()).every((req) => userSet.includes(req)));
+
+		if (matchingRecipes.length === 0) {
+			if (!category) {
+				throw new NotFoundException('No matching recipes found for the selected ingredients.');
+			} else {
+				throw new NotFoundException('No matching recipes found for the selected category and ingredients.');
+			}
+		}
+
+		return matchingRecipes;
 	}
 }
