@@ -3,6 +3,7 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RequestWithUser } from 'src/auth/types/request-user';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
+import { SearchRecipeDto } from './dto/search-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipeService } from './recipe.service';
 
@@ -85,5 +86,12 @@ export class RecipeController {
 	@UseGuards(JwtAuthGuard)
 	async getMyFavorites(@Req() req: RequestWithUser) {
 		return this.recipeService.getUserFavorites(req.user.id);
+	}
+
+	// search
+	@Public()
+	@Post('/search')
+	async search(searchRecipeDto: SearchRecipeDto) {
+		return this.recipeService.searchRecipesMatching(searchRecipeDto);
 	}
 }
