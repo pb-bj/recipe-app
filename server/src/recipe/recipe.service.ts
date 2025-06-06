@@ -69,4 +69,45 @@ export class RecipeService {
 		await this.recipeRepository.remove(recipe);
 		return { message: 'Recipe deleted successfully' };
 	}
+
+	async toggleFavouriteRecipes(recipeId: string, userId: string) {
+		const user = await this.userRepository.findOne({
+			where: { id: userId },
+			relations: ['favourite_recipes'],
+		});
+
+		if (!user) throw new NotFoundException('User not found');
+
+		const recipe = await this.recipeRepository.findOne({ where: { id: recipeId } });
+		if (!recipe) throw new NotFoundException('Recipe not found');
+
+		const alreadyFavorited = user.favourite_recipes.some((r) => r.id === recipe.id);
+
+		if (alreadyFavorited) {
+			user.favourite_recipes = user.favourite_recipes.filter((r) => r.id !== recipe.id);
+			await this.userRepository.save(user);
+			return {
+				message: 'Removed from favorites',
+				isFavorite: false,
+			};
+		} else {
+			user.favourite_recipes.push(recipe);
+			await this.userRepository.save(user);
+			return {
+				message: 'Added to favorites',
+				isFavorite: true,
+			};
+		}
+	}
+
+	async getUserFavorites(userId: string): Promise<Recipe[]> {
+		const user = await this.userRepository.findOne({
+			where: { id: userId },
+			relations: ['favourite_recipes'],
+		});
+
+		if (!user) throw new NotFoundException('User not found');
+
+		return user.favourite_recipes;
+	}
 }

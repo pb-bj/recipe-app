@@ -72,4 +72,18 @@ export class RecipeController {
 			message: 'Recipe deleted successfully',
 		};
 	}
+
+	// for favorite recipes
+	@Post(':id/favorite')
+	@UseGuards(JwtAuthGuard)
+	async toggleFavorite(@Param('id') recipeId: string, @Req() req: RequestWithUser) {
+		const userId = req.user.id;
+		return this.recipeService.toggleFavouriteRecipes(recipeId, userId);
+	}
+
+	@Get('user/favorites')
+	@UseGuards(JwtAuthGuard)
+	async getMyFavorites(@Req() req: RequestWithUser) {
+		return this.recipeService.getUserFavorites(req.user.id);
+	}
 }
