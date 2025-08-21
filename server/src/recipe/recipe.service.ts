@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
-import { SearchRecipeDto } from './dto/search-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Recipe } from './entities/recipe.entity';
 
@@ -112,25 +111,26 @@ export class RecipeService {
 		return user.favourite_recipes;
 	}
 
-	async searchRecipesMatching(searchRecipes: SearchRecipeDto) {
-		const { ingredients, category } = searchRecipes;
-		const candidate = await this.recipeRepository.find({
-			where: category ? { category } : {},
+	async findSimilarRecipes(userIngredients: string[]): Promise<{ recipe: Recipe; score: number }[]> {
+		const recipes = await this.recipeRepository.find();
+
+		const results = recipes.map((recipe) => {
+			const recipeIngredients = recipe.ingredients.map((i) => i.toLowerCase().trim());
+			const userSet = userIngredients.map((i) => i.toLowerCase().trim());
+
+			// Flexible intersection: check if user ingredient is contained inside recipe ingredient
+			const intersection = userSet.filter((userIng) => recipeIngredients.some((ing) => ing.includes(userIng)));
+
+			const union = new Set([...recipeIngredients, ...userSet]);
+
+			const jaccardScore = union.size > 0 ? intersection.length / union.size : 0;
+
+			const percentageScore = Math.round(jaccardScore * 100);
+			return { recipe, score: percentageScore };
 		});
 
-		const userSet = ingredients.map((x) => x.toLowerCase().trim());
+		results.sort((a, b) => b.score - a.score);
 
-		// subset-checking every candidate
-		const matchingRecipes = candidate.filter((recipe) => recipe.ingredients.map((x) => x.toLowerCase().trim()).every((req) => userSet.includes(req)));
-
-		if (matchingRecipes.length === 0) {
-			if (!category) {
-				throw new NotFoundException('No matching recipes found for the selected ingredients.');
-			} else {
-				throw new NotFoundException('No matching recipes found for the selected category and ingredients.');
-			}
-		}
-
-		return matchingRecipes;
+		return results;
 	}
 }

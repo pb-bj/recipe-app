@@ -3,7 +3,6 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RequestWithUser } from 'src/auth/types/request-user';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
-import { SearchRecipeDto } from './dto/search-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipeService } from './recipe.service';
 
@@ -89,9 +88,17 @@ export class RecipeController {
 	}
 
 	// search
-	@Public()
-	@Post('/search')
-	async search(searchRecipeDto: SearchRecipeDto) {
-		return this.recipeService.searchRecipesMatching(searchRecipeDto);
+	// @Public()
+	// @Post('/search')
+	// async search(searchRecipeDto: SearchRecipeDto) {
+	// 	return this.recipeService.searchRecipesMatching(searchRecipeDto);
+	// }
+
+	@Post('search-by-ingredients')
+	async searchByIngredients(@Body('ingredients') ingredients: string[]) {
+		const results = await this.recipeService.findSimilarRecipes(ingredients);
+
+		// Optional: only return top 5 matches
+		return results.slice(0, 5);
 	}
 }
